@@ -43,6 +43,7 @@ export const login = async (req: express.Request, res: express.Response) => {
       userByEmail.authentication.salt,
       password
     );
+    const salt = random();
 
     if (!email || !password) {
       return res.sendStatus(400);
@@ -56,8 +57,6 @@ export const login = async (req: express.Request, res: express.Response) => {
       return res.sendStatus(403);
     }
 
-    const salt = random();
-
     userByEmail.authentication.sessionToken = authentication(
       salt,
       userByEmail._id.toString()
@@ -65,7 +64,7 @@ export const login = async (req: express.Request, res: express.Response) => {
 
     await userByEmail.save();
 
-    res.cookie("TKAY-AUTH", userByEmail.authentication.sessionToken, {
+    res.cookie("USER-AUTH", userByEmail.authentication.sessionToken, {
       domain: "localhost",
       path: "/",
     });
