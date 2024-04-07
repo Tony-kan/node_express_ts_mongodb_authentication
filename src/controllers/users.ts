@@ -12,7 +12,7 @@ export const getAllUsers = async (
     return res.status(200).json(users);
   } catch (error) {
     console.log(error);
-    return res.sendStatus(400);
+    return res.status(500).json({ message: "Internal Server Error ." });
   }
 };
 
@@ -25,10 +25,14 @@ export const deleteUser = async (
 
     const deletedUser = await deleteUserById(id);
 
-    return res.json(deletedUser);
+    if (!deleteUser) {
+      return res.status(404).json({ message: "User not found ." });
+    }
+
+    return res.status(200).json(deletedUser);
   } catch (error) {
     console.log(error);
-    return res.sendStatus(400);
+    return res.status(500).json({ message: "Internal Server Error." });
   }
 };
 
@@ -40,12 +44,15 @@ export const updateUser = async (
     const { id } = req.params;
     const { username } = req.body;
 
-    if (!username) {
-      return res.sendStatus(400);
-    }
-
     const user = await getUserById(id);
 
+    if (!username) {
+      return res.status(400).json({ message: "Username is Required ." });
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
     user.username = username;
     await user.save();
 
@@ -53,6 +60,6 @@ export const updateUser = async (
   } catch (error) {
     console.log(error);
 
-    return res.sendStatus(400);
+    return res.status(500).json({ message: "Internal Server Error." });
   }
 };

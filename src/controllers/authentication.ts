@@ -9,11 +9,15 @@ export const register = async (req: express.Request, res: express.Response) => {
     const existingUser = await getUserByEmail(email);
 
     if (!email || !password || !username) {
-      return res.sendStatus(400);
+      return res
+        .status(400)
+        .json({ message: "Email , Password and Username are required." });
     }
 
     if (existingUser) {
-      return res.sendStatus(400);
+      return res
+        .status(409)
+        .json({ message: "User with this email already exists." });
     }
 
     const salt = random();
@@ -26,10 +30,10 @@ export const register = async (req: express.Request, res: express.Response) => {
       },
     });
 
-    return res.status(200).json(user).end();
+    return res.status(201).json(user).end();
   } catch (error) {
     console.log(error);
-    return res.sendStatus(400);
+    return res.status(500).json({ message: "Internal Server Error." });
   }
 };
 
@@ -46,15 +50,17 @@ export const login = async (req: express.Request, res: express.Response) => {
     const salt = random();
 
     if (!email || !password) {
-      return res.sendStatus(400);
+      return res
+        .status(400)
+        .json({ message: "Email and Password are required." });
     }
 
     if (!userByEmail) {
-      return res.sendStatus(400);
+      return res.status(401).json({ message: "Invalid email or Password" });
     }
 
     if (userByEmail.authentication.password !== expectedHash) {
-      return res.sendStatus(403);
+      return res.status(401).json({ message: "Invalid Password" });
     }
 
     userByEmail.authentication.sessionToken = authentication(
@@ -72,6 +78,6 @@ export const login = async (req: express.Request, res: express.Response) => {
     return res.status(200).json(userByEmail).end();
   } catch (error) {
     console.log(error);
-    res.sendStatus(400);
+    return res.status(500).json({ message: "Internal Server Error." });
   }
 };

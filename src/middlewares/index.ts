@@ -12,12 +12,8 @@ export const isAuthenticated = async (
     const sessionToken = req.cookies["USER-AUTH"];
     const existingUser = await getUserBySessionToken(sessionToken);
 
-    if (!sessionToken) {
-      return res.sendStatus(403);
-    }
-
-    if (!existingUser) {
-      return res.sendStatus(403);
+    if (!sessionToken || !existingUser) {
+      return res.status(403).json({ message: "Unauthorized ." });
     }
 
     merge(req, { identity: existingUser });
@@ -25,7 +21,7 @@ export const isAuthenticated = async (
     return next();
   } catch (error) {
     console.log(error);
-    return res.sendStatus(400);
+    return res.status(500).json({ message: "Internal Server Error." });
   }
 };
 
@@ -40,16 +36,16 @@ export const isOwner = async (
     const currentUserId = get(req, "identity._id") as string;
 
     if (!currentUserId) {
-      return res.sendStatus(403);
+      return res.status(403).json({ message: "Forbidden ." });
     }
 
     if (currentUserId.toString() !== id) {
-      return res.sendStatus(403);
+      return res.status(403).json({ message: "Forbidden ." });
     }
 
     next();
   } catch (error) {
     console.log(error);
-    return res.sendStatus(400);
+    return res.status(500).json({ message: "Internal Server Error." });
   }
 };
